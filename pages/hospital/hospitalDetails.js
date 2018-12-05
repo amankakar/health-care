@@ -3,12 +3,14 @@ import ReactDOM from "react-dom";
 import ToggleDisplay from "react-toggle-display";
 import ReceptionsitFactory from "../../build/contracts/ReceptionsitFactory.json";
 import Receptionist from "../../build/contracts/Receptionsit.json";
-import { Card, Button, Tab, Form, Input } from "semantic-ui-react";
+import { Card, Button, Tab, Form, Input, Dropdown } from "semantic-ui-react";
 import { Link } from "../../routes";
 import getWeb3 from "../../ethereum/getWeb3";
 import web3 from "../../ethereum/web3";
 import truffleContract from "truffle-contract";
 import Layout from "../../components/Layout";
+// import Dropdown from "react-dropdown";
+// import "../style.css";
 class hospitalDetails extends Component {
   //intialize state of variable use
   state = {
@@ -20,7 +22,8 @@ class hospitalDetails extends Component {
     doctorName: "",
     doctorGender: "",
     doctorQualification: "",
-    doctorId: ""
+    doctorId: "",
+    notAdmin: ""
   };
   //get Address of  hospital/ Receptionist contract provided in intial props and set show contract information
   static async getInitialProps(props) {
@@ -32,7 +35,7 @@ class hospitalDetails extends Component {
     const instanceReceptionist = await ContractReceptionist.at(address);
     const hospitalSummary = await instanceReceptionist.getSummary.call();
     console.log(accounts[0], "and acctual is ===:", hospitalSummary[2]);
-
+    const optionsArray = ["one", "two", "three"];
     console.log("S", hospitalSummary);
     return {
       address: props.query.address,
@@ -54,10 +57,14 @@ class hospitalDetails extends Component {
 
     if (this.props.manager === accounts[0]) {
       this.setState({ show: !this.state.show });
-
+      // this.setState({ patientId: ["aman", "khan"] });
       console.log("ISADMIn:", this.state.show);
     } else {
       this.setState({ show: false });
+      this.setState({
+        notAdmin:
+          "you are not admin or you have selected Wrong account in Metamask please check"
+      });
       console.log("ISADMIn:", this.state.show);
     }
   };
@@ -93,7 +100,28 @@ class hospitalDetails extends Component {
   onGenderDoctorHandle = event => {
     this.setState({ doctorGender: event.target.value });
   };
+  _onSelect = event => {
+    event.preventDefault();
+    this.props.optionsArray[0];
+    console.log();
+  };
   //render methods to render jsx Components
+  renderDropDownPatient = patienId => {
+    const options = [
+      { key: 1, text: "Choice 1", value: 1 },
+      { key: 2, text: "Choice 2", value: 2 },
+      { key: 3, text: "Choice 3", value: 3 }
+    ];
+    return <Dropdown clearable options={options} selection />;
+  };
+  renderDropDownDoctor = doctorId => {
+    const options = [
+      { text: "Selection" },
+      { text: "Choice 2" },
+      { text: "Choice 3" }
+    ];
+    return <Dropdown clearable options={options} selection />;
+  };
   renderTabs() {
     const panes = [
       {
@@ -180,6 +208,35 @@ class hospitalDetails extends Component {
         render: () => (
           <Tab.Pane attached={false}>
             <h1>Create Appointment</h1>
+            <Form>
+              <Form.Field>
+                <label>Patinet ID</label>
+                {this.renderDropDownPatient()}
+              </Form.Field>
+
+              <Form.Field>
+                <label>Doctor Name</label>
+                <Input
+                  value={this.state.doctorName}
+                  onChange={this.onDoctorHandle}
+                />
+              </Form.Field>
+              <Form.Field>
+                <label>Doctor Gender</label>
+                <Input
+                  value={this.state.doctorGender}
+                  onChange={this.onGenderDoctorHandle}
+                />
+              </Form.Field>
+              <Form.Field>
+                <label>Doctor Qualification</label>
+                <Input
+                  value={this.state.doctorQualification}
+                  onChange={this.onQualificationHandle}
+                />
+              </Form.Field>
+              <Button primary> Add Doctor </Button>
+            </Form>
           </Tab.Pane>
         )
       }
@@ -214,8 +271,14 @@ class hospitalDetails extends Component {
         <hr />
         <ToggleDisplay show={this.state.show}>
           {" "}
-          <h1>Admin Panel</h1>
+          <h1 style={{ align: "center" }}>Admin Panel</h1>
           {this.renderTabs()}
+        </ToggleDisplay>
+        <ToggleDisplay show={!this.state.show}>
+          {" "}
+          <div>
+            <h1 style={{ color: "red" }}>{this.state.notAdmin}</h1>
+          </div>
         </ToggleDisplay>
       </Layout>
     );
