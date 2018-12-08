@@ -34,7 +34,7 @@ class index extends Component {
     const instanceFactory = await Contract.deployed();
     console.log("Address:", instanceFactory);
     const receptionCount = await instanceFactory.getReceptionList.call();
-    console.log(receptionCount);
+    console.log("List of :", receptionCount);
     const receptionist = await Promise.all(
       Array(parseInt(receptionCount))
         .fill()
@@ -143,7 +143,19 @@ class index extends Component {
     });
     console.log("Lenght", this.props.receptionist);
 
-    return <Card.Group items={items} />;
+    return (
+      <Card.Group
+        items={items}
+        style={{
+          color: "black",
+          marginTop: 10,
+          borderRadius: 4,
+          margin: 10,
+          fontFamily: "Times New Roman, Times, serif",
+          fontSize: 20
+        }}
+      />
+    );
   }
 
   onSubmit = async event => {
@@ -316,11 +328,12 @@ class index extends Component {
               />
             </a>
           </Link>
-
-          <h2>List Of All Registered Hospitals</h2>
+          <div style={{ marginLeft: 300 }}>
+            <h2>List Of All Registered Hospitals</h2>
+          </div>{" "}
         </div>
         <hr />
-        {this.renderCampiagns()};
+        <div>{this.renderCampiagns()};</div>
       </Layout>
     );
   }

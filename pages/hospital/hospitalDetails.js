@@ -3,7 +3,15 @@ import ReactDOM from "react-dom";
 import ToggleDisplay from "react-toggle-display";
 import ReceptionsitFactory from "../../build/contracts/ReceptionsitFactory.json";
 import Receptionist from "../../build/contracts/Receptionsit.json";
+import PatientFactory from "../../build/contracts/PatientFactory.json";
+import Patient from "../../build/contracts/Patient.json";
+import DoctorFactory from "../../build/contracts/DoctorFactory.json";
+import Doctor from "../../build/contracts/Doctor.json";
 import { Card, Button, Tab, Form, Input, Dropdown } from "semantic-ui-react";
+import DatetimePicker from "react-semantic-datetime";
+import moment from "moment"; //for date picker
+import { BigNumber } from "bignumber.js";
+
 import { Link } from "../../routes";
 import getWeb3 from "../../ethereum/getWeb3";
 import web3 from "../../ethereum/web3";
@@ -23,7 +31,18 @@ class hospitalDetails extends Component {
     doctorGender: "",
     doctorQualification: "",
     doctorId: "",
-    notAdmin: ""
+    appointmentId: "",
+    patientAccount: "",
+    doctorAccount: "",
+    textArea: "",
+    currentPatientValue: "",
+    currentDoctorValue: "",
+    notAdmin: "",
+    date: moment(),
+    date1: "",
+    dateTimeOpen: false,
+    patientIdArray: null,
+    doctorIdArray: null
   };
   //get Address of  hospital/ Receptionist contract provided in intial props and set show contract information
   static async getInitialProps(props) {
@@ -37,6 +56,13 @@ class hospitalDetails extends Component {
     console.log(accounts[0], "and acctual is ===:", hospitalSummary[2]);
     const optionsArray = ["one", "two", "three"];
     console.log("S", hospitalSummary);
+
+    //  console.log(Factory);
+    //PatinentContract
+    //const Contract = truffleContract(Doctor);
+    //console.log(Contract);
+    //Contract.setProvider(web3.currentProvider);
+
     return {
       address: props.query.address,
       hospitalName: hospitalSummary[0],
@@ -54,10 +80,72 @@ class hospitalDetails extends Component {
     const accounts = await web3.eth.getAccounts();
     console.log("account at index:", this.props.manager);
     console.log("account in metamask", accounts);
+    const Factory = truffleContract(PatientFactory);
+    //  console.log(Factory);
+    Factory.setProvider(web3.currentProvider);
+    console.log(Factory);
 
+    const patientFactoryInstance = await Factory.deployed();
+
+    const patientList = await patientFactoryInstance.getPatientList.call();
+    this.setState({ patientIdArray: patientList });
+    this.preparePatientDropDown();
+    const FactoryDoctor = truffleContract(DoctorFactory);
+    //  console.log(Factory);
+    FactoryDoctor.setProvider(web3.currentProvider);
+    console.log(FactoryDoctor);
+
+    const doctorFactoryInstance = await FactoryDoctor.deployed();
+
+    const doctorList = await doctorFactoryInstance.getDoctorList.call();
+    this.setState({ doctorIdArray: doctorList });
+    this.prepareDoctorDropdown();
+    // const FactoryDoctor = truffleContract(DoctorFactory);
+    // //  console.log(Factory);
+    // FactoryDoctor.setProvider(web3.currentProvider);
+    // const doctorFactoryInstance = await FactoryDoctor.deployed();
+    // const doctorList = await doctorFactoryInstance.getDoctorList.call();
+    // this.setState({ doctorIdArray: doctorList });
+    //console.log("patientList:", patientList.length);
     if (this.props.manager === accounts[0]) {
       this.setState({ show: !this.state.show });
-      // this.setState({ patientId: ["aman", "khan"] });
+      //this.renderDropDownPatient();
+      //Patient factory
+      // const Factory = truffleContract(PatientFactory);
+      // //  console.log(Factory);
+      // Factory.setProvider(web3.currentProvider);
+      // //  console.log(Factory);
+      // //PatinentContract
+      // const Contract = truffleContract(Patient);
+      // //console.log(Contract);
+      // Contract.setProvider(web3.currentProvider);
+      // //  console.log(Contract);
+      // const patientFactoryInstance = await Factory.deployed();
+      // //console.log("RESULT:", patientFactoryInstance.address);
+      // try {
+      //   const result = await patientFactoryInstance.addPatient(
+      //     1,
+      //     "Aman",
+      //     "Male",
+      //     24,
+      //     accounts[0],
+      //     { from: accounts[0] }
+      //   );
+      //   console.log("RESULT:", result);
+      // } catch (error) {
+      //   console.error(error);
+      // }
+      //
+      // const patientId = await patientFactoryInstance.patientIdToAddress.call(1);
+      // //  const patientFactoryInstance = await Factory.deployed();
+      // console.log("address of patient:", patientId);
+      //
+      // // console.log("Address of Patient", patientId.address);
+      // console.log(patientFactoryInstance.address);
+      //
+      // const man = await patientFactoryInstance.manager.call();
+      // console.log(man);
+      // // this.setState({ patientId: ["aman", "khan"] });
       console.log("ISADMIn:", this.state.show);
     } else {
       this.setState({ show: false });
@@ -67,6 +155,176 @@ class hospitalDetails extends Component {
       });
       console.log("ISADMIn:", this.state.show);
     }
+  };
+
+  //Add Patient
+  addPatient = async () => {
+    //const { patientFactoryInstance } = this.props;
+    const Factory = truffleContract(PatientFactory);
+    //  console.log(Factory);
+    Factory.setProvider(web3.currentProvider);
+    console.log(Factory);
+    //PatinentContract;
+    const Contract = truffleContract(Patient);
+    //console.log(Contract);
+    Contract.setProvider(web3.currentProvider);
+    //  console.log(Contract);
+    const patientFactoryInstance = await Factory.deployed();
+    console.log("RESULT:", patientFactoryInstance.address);
+
+    try {
+      const accounts = await web3.eth.getAccounts();
+
+      const result = await patientFactoryInstance.addPatient(
+        // 1,
+        // "Aman",
+        // "Male",
+        // 24,
+        // accounts[0],
+        this.state.patientId,
+        this.state.patientName,
+        this.state.patientGender,
+        this.state.patientAge,
+        this.state.patientAccount,
+        { from: accounts[0] }
+      );
+      console.log("RESULT:", result);
+    } catch (error) {
+      console.error(error);
+    }
+
+    const patientinstanceAddress = await patientFactoryInstance.patientIdToAddress.call(
+      this.state.patientId
+    );
+    const patientInstance = await Contract.at(patientinstanceAddress);
+
+    const summary = await patientInstance.getSummary.call(this.state.patientId);
+    console.log("summary:", summary);
+    //  const patientFactoryInstance = await Factory.deployed();
+    console.log("address of patient:", patientinstanceAddress);
+    this.preparePatientDropDown();
+    // const patientList = await patientFactoryInstance.getPatientList.call();
+    // const patient = await Promise.all(
+    //   Array(parseInt(patientList))
+    //     .fill()
+    //     .map((element, index) => {
+    //       return patientFactoryInstance.patientId.call(index);
+    //       // .then((element , index)=>{
+    //       //
+    //       // })
+    //       // ;
+    //     })
+    // );
+    // console.log("Patient list:", patient);
+    // this.setState({ patientIdArray: patient });
+    //
+    // console.log("patientList:", this.state.patientIdArray);
+  };
+  //prepare dropdown for patient
+  async preparePatientDropDown() {
+    const FactoryPatient = truffleContract(PatientFactory);
+    //  console.log(Factory);
+    FactoryPatient.setProvider(web3.currentProvider);
+
+    const patientFactoryInstance = await FactoryPatient.deployed();
+
+    const patientList = await patientFactoryInstance.getPatientList.call();
+    const patient = await Promise.all(
+      Array(parseInt(patientList))
+        .fill()
+        .map((element, index) => {
+          return patientFactoryInstance.patientId.call(index);
+          // .then((element , index)=>{
+          //
+          // })
+          // ;
+        })
+    );
+    console.log("Patient list:", patient);
+    this.setState({ patientIdArray: patient });
+
+    console.log("patientList:", this.state.patientIdArray);
+  }
+
+  //prepare dropdown for doctor id
+  async prepareDoctorDropdown() {
+    const FactoryDoctor = truffleContract(DoctorFactory);
+    //  console.log(Factory);
+    FactoryDoctor.setProvider(web3.currentProvider);
+
+    const doctorFactoryInstance = await FactoryDoctor.deployed();
+
+    const doctorList = await doctorFactoryInstance.getDoctorList.call();
+    const doctor = await Promise.all(
+      Array(parseInt(doctorList))
+        .fill()
+        .map((element, index) => {
+          return doctorFactoryInstance.doctorId.call(index);
+          // .then((element , index)=>{
+          //
+          // })
+          // ;
+        })
+    );
+    console.log("Doctor list:", doctor);
+    this.setState({ doctorIdArray: doctor });
+
+    console.log("patientList:", this.state.doctorIdArray);
+  }
+  //Add Doctor
+  addDoctor = async event => {
+    const FactoryDoctor = truffleContract(DoctorFactory);
+    //  console.log(Factory);
+    FactoryDoctor.setProvider(web3.currentProvider);
+
+    const doctorFactoryInstance = await FactoryDoctor.deployed();
+
+    try {
+      const accounts = await web3.eth.getAccounts();
+
+      const result = await doctorFactoryInstance.addDoctor(
+        // 1,
+        // "Aman",
+        // "Male",
+        // 24,
+        // accounts[0],
+        this.state.doctorId,
+        this.state.doctorName,
+        this.state.doctorGender,
+        this.state.doctorQualification,
+        this.state.doctorAccount,
+        { from: accounts[0] }
+      );
+      console.log("RESULT:", result);
+    } catch (error) {
+      console.error(error);
+    }
+
+    const doctorInstanceAddress = await doctorFactoryInstance.doctorIdToAddress.call(
+      this.state.doctorId
+    );
+    //const doctorInstance = await Contract.at(doctorInstanceAddress);
+    //
+    // const summary = await doctorInstance.getSummary.call(this.state.doctorId);
+    // console.log("summary:", summary);
+    const doctorList = await doctorFactoryInstance.getDoctorList.call();
+    console.log("doctorlist:", doctorList.length);
+    //  const patientFactoryInstance = await Factory.deployed();
+    console.log("address of Doctor:", doctorInstanceAddress);
+    this.prepareDcotorDropdown();
+    // const requests = await Promise.all(
+    //   Array(parseInt(requestCount))
+    //     .fill()
+    //     .map((element, index) => {
+    //       return campaign.methods.requests(index).call();
+    //     })
+    // );
+  };
+
+  //On appointment onSubmit
+
+  onAppointmentSubmit = async event => {
+    event.preventDefault();
   };
   //State methods to handle state of inputs
   //Patient add form handler methods
@@ -100,62 +358,150 @@ class hospitalDetails extends Component {
   onGenderDoctorHandle = event => {
     this.setState({ doctorGender: event.target.value });
   };
-  _onSelect = event => {
-    event.preventDefault();
-    this.props.optionsArray[0];
-    console.log();
+
+  onAppointmentId = event => {
+    this.setState({ appointmentId: event.target.value });
+  };
+  onPatientAccountHandle = event => {
+    this.setState({ patientAccount: event.target.value });
+  };
+  onDoctorAccountHandle = event => {
+    this.setState({ doctorAccount: event.target.value });
+  };
+  onTextArea = event => {
+    this.setState({ textArea: event.target.value });
+    console.log(this.state.textArea);
+  };
+
+  handlePatientChange = (e, { value }) => {
+    //  console.log(value);
+    this.setState({ currentPatientValue: value });
+    console.log(this.state.currentPatientValue);
+  };
+
+  handleDoctorChange = (e, { value }) => {
+    //  console.log(value);
+    this.setState({ currentDoctorValue: value });
+    console.log(this.state.currentDoctorValue);
+  };
+
+  onAppointmentSubmit = event => {
+    console.log(this.state.currentPatientValue);
+    console.log(this.state.currentDoctorValue);
+    console.log(this.state.date1);
+    console.log(this.state.date);
   };
   //render methods to render jsx Components
   renderDropDownPatient = patienId => {
-    const options = [
-      { key: 1, text: "Choice 1", value: 1 },
-      { key: 2, text: "Choice 2", value: 2 },
-      { key: 3, text: "Choice 3", value: 3 }
-    ];
-    return <Dropdown clearable options={options} selection />;
+    const { currentPatientValue, patientIdArray } = this.state;
+
+    console.log("render maethod:", this.state.patientIdArray);
+    const patientArray = this.state.patientIdArray.map((element, index) => {
+      //console.log("element:", index, element.toNumber());
+      var element1 = element.toNumber().toString();
+      return {
+        key: index,
+        text: element1,
+        value: element1
+      };
+    });
+    const options = patientArray.map((element1, index) => {
+      return { key: index, text: element1, value: element1 };
+    });
+    console.log("options :", options);
+    console.log("patient Array:", patientArray);
+    //
+    // { key: index, text:element.toNumber() , value: element.toNumber() },
+    // { key: 2, text: "Choice 2", value: 2 },
+    // { key: 3, text: "Choice 3", value: 3 }
+    // ];
+    return (
+      <Dropdown
+        clearable
+        options={patientArray}
+        selection
+        search
+        value={currentPatientValue}
+        onChange={this.handlePatientChange}
+      />
+    );
   };
   renderDropDownDoctor = doctorId => {
-    const options = [
-      { text: "Selection" },
-      { text: "Choice 2" },
-      { text: "Choice 3" }
-    ];
-    return <Dropdown clearable options={options} selection />;
+    const { currentDoctorValue } = this.state;
+    console.log("render maethod:", this.state.doctorIdArray);
+    const doctorArray = this.state.doctorIdArray.map((element, index) => {
+      //console.log("element:", index, element.toNumber());
+      var element1 = element.toNumber().toString();
+      return {
+        key: index,
+        text: element1,
+        value: element1
+      };
+    });
+    console.log("patient Array:", doctorArray);
+
+    // const options = [
+    //   { key: 1, text: "Choice 1", value: 1 },
+    //   { key: 2, text: "Choice 2", value: 2 },
+    //   { key: 3, text: "Choice 3", value: 3 }
+    // ];
+    // console.log("OPTIONS:", options);
+    return (
+      <Dropdown
+        clearable
+        options={doctorArray}
+        selection
+        value={currentDoctorValue}
+        onChange={this.handleDoctorChange}
+      />
+    );
   };
   renderTabs() {
     const panes = [
       {
-        menuItem: "Add Patinet",
+        menuItem: "Add Patient",
         render: () => (
           <Tab.Pane attached={false}>
             <h1>Patient Information</h1>
-            <Form onSubmit={this.addPatinet}>
+            <Form onSubmit={this.addPatient}>
+              <Form.Group widths="equal">
+                <Form.Field>
+                  <label>Patient ID</label>
+                  <Input
+                    value={this.state.patientId}
+                    onChange={this.onPatientIdHandle}
+                  />
+                </Form.Field>
+                <Form.Field>
+                  <label>Patient Name</label>
+                  <Input
+                    value={this.state.patientName}
+                    onChange={this.onPatientHandle}
+                  />
+                </Form.Field>
+              </Form.Group>
+              <Form.Group widths="equal">
+                <Form.Field>
+                  <label>Patient Gender</label>
+                  <Input
+                    value={this.state.patientGender}
+                    onChange={this.onGenderHandle}
+                  />
+                </Form.Field>
+                <Form.Field>
+                  <label>Patient Age</label>
+                  <Input
+                    value={this.state.patientAge}
+                    onChange={this.onAgeHandle}
+                  />
+                </Form.Field>
+              </Form.Group>
+
               <Form.Field>
-                <label>Patient ID</label>
+                <label>Account</label>
                 <Input
-                  value={this.state.patientId}
-                  onChange={this.onPatientIdHandle}
-                />
-              </Form.Field>
-              <Form.Field>
-                <label>Patient Name</label>
-                <Input
-                  value={this.state.patientName}
-                  onChange={this.onPatientHandle}
-                />
-              </Form.Field>
-              <Form.Field>
-                <label>Patient Gender</label>
-                <Input
-                  value={this.state.patientGender}
-                  onChange={this.onGenderHandle}
-                />
-              </Form.Field>
-              <Form.Field>
-                <label>Patient Age</label>
-                <Input
-                  value={this.state.patientAge}
-                  onChange={this.onAgeHandle}
+                  value={this.state.patientAccount}
+                  onChange={this.onPatientAccountHandle}
                 />
               </Form.Field>
               <Button primary> Add Patient </Button>
@@ -168,34 +514,46 @@ class hospitalDetails extends Component {
         render: () => (
           <Tab.Pane attached={false}>
             <h1>Doctor Information</h1>
-            <Form onSubmit={this.addDoctor}>
-              <Form.Field>
-                <label>Doctor ID</label>
-                <Input
-                  value={this.state.doctorId}
-                  onChange={this.onDoctorIdHandle}
-                />
-              </Form.Field>
 
+            <Form onSubmit={this.addDoctor}>
+              <Form.Group widths="equal">
+                <Form.Field>
+                  <label>Doctor ID</label>
+                  <Input
+                    value={this.state.doctorId}
+                    onChange={this.onDoctorIdHandle}
+                  />
+                </Form.Field>
+
+                <Form.Field>
+                  <label>Doctor Name</label>
+                  <Input
+                    value={this.state.doctorName}
+                    onChange={this.onDoctorHandle}
+                  />
+                </Form.Field>
+              </Form.Group>
+              <Form.Group widths="equal">
+                <Form.Field>
+                  <label>Doctor Gender</label>
+                  <Input
+                    value={this.state.doctorGender}
+                    onChange={this.onGenderDoctorHandle}
+                  />
+                </Form.Field>
+                <Form.Field>
+                  <label>Doctor Qualification</label>
+                  <Input
+                    value={this.state.doctorQualification}
+                    onChange={this.onQualificationHandle}
+                  />
+                </Form.Field>
+              </Form.Group>
               <Form.Field>
-                <label>Doctor Name</label>
+                <label>Account</label>
                 <Input
-                  value={this.state.doctorName}
-                  onChange={this.onDoctorHandle}
-                />
-              </Form.Field>
-              <Form.Field>
-                <label>Doctor Gender</label>
-                <Input
-                  value={this.state.doctorGender}
-                  onChange={this.onGenderDoctorHandle}
-                />
-              </Form.Field>
-              <Form.Field>
-                <label>Doctor Qualification</label>
-                <Input
-                  value={this.state.doctorQualification}
-                  onChange={this.onQualificationHandle}
+                  value={this.state.doctorAccount}
+                  onChange={this.onDoctorAccountHandle}
                 />
               </Form.Field>
               <Button primary> Add Doctor </Button>
@@ -208,33 +566,63 @@ class hospitalDetails extends Component {
         render: () => (
           <Tab.Pane attached={false}>
             <h1>Create Appointment</h1>
-            <Form>
+            <Form onSubmit={this.onAppointmentSubmit}>
+              <Form.Group widths="equal">
+                <Form.Field>
+                  <label>Appointment Id</label>
+                  <Input
+                    value={this.state.appointmentId}
+                    onChange={this.onAppointmentId}
+                  />
+                </Form.Field>
+                <Form.Field>
+                  <label>Appointment Date </label>
+                  <Input
+                    action={{
+                      color: "teal",
+                      icon: "calendar",
+                      onClick: () => this.setState({ dateTimeOpen: true })
+                    }}
+                    actionPosition="left"
+                    value={moment(this.state.myDate).format("LLL")}
+                    onClick={() => this.setState({ dateTimeOpen: true })}
+                    disabled={this.state.dateTimeOpen}
+                    fluid
+                  />
+                  {this.state.dateTimeOpen && (
+                    <DatetimePicker
+                      onChange={value => {
+                        this.setState({ myDate: value, dateTimeOpen: false });
+                        this.setState({
+                          date: moment(this.state.myDate).format("LLL")
+                        });
+                      }}
+                      moment={this.myDate}
+                      time={true}
+                    />
+                  )}
+                </Form.Field>
+              </Form.Group>
+              <Form.Group widths="equal">
+                <Form.Field>
+                  <label>Patient ID</label>
+                  {this.renderDropDownPatient()}
+                </Form.Field>
+
+                <Form.Field>
+                  <label>Doctor ID</label>
+                  {this.renderDropDownDoctor()}
+                </Form.Field>
+              </Form.Group>
               <Form.Field>
-                <label>Patinet ID</label>
-                {this.renderDropDownPatient()}
+                <Form.TextArea
+                  label="Chep Complaint"
+                  rows={2}
+                  placeholder="write patient disease..."
+                  onChange={this.onTextArea}
+                />
               </Form.Field>
 
-              <Form.Field>
-                <label>Doctor Name</label>
-                <Input
-                  value={this.state.doctorName}
-                  onChange={this.onDoctorHandle}
-                />
-              </Form.Field>
-              <Form.Field>
-                <label>Doctor Gender</label>
-                <Input
-                  value={this.state.doctorGender}
-                  onChange={this.onGenderDoctorHandle}
-                />
-              </Form.Field>
-              <Form.Field>
-                <label>Doctor Qualification</label>
-                <Input
-                  value={this.state.doctorQualification}
-                  onChange={this.onQualificationHandle}
-                />
-              </Form.Field>
               <Button primary> Add Doctor </Button>
             </Form>
           </Tab.Pane>
@@ -248,9 +636,9 @@ class hospitalDetails extends Component {
     const { address, hospitalName, adminName, manager } = this.props;
     return (
       <div>
-        <h3>{hospitalName}</h3>
-        <h3>{adminName}</h3>
-        <h3>{manager}</h3>
+        <div>Hospital Name: {hospitalName}</div>
+        <div>Admin Name: {adminName}</div>
+        <div>Account: {manager}</div>
       </div>
     );
   }
@@ -265,13 +653,29 @@ class hospitalDetails extends Component {
             content="Show admin View"
             onClick={this.onUnlockView}
           />
-          <h1>Hospital Details</h1>
-          {this.renderHospital()}
+          <div style={{ marginLeft: 300 }}>
+            <h1>Hospital Details</h1>
+          </div>
+          <div
+            style={{
+              backgroundColor: "#4267b2",
+              color: "white",
+              marginTop: 10,
+              borderRadius: 4,
+              padding: 10,
+              paddingLeft: 50,
+              margin: 10,
+              fontFamily: "Times New Roman, Times, serif",
+              fontSize: 20
+            }}
+          >
+            {this.renderHospital()}
+          </div>
         </div>
         <hr />
         <ToggleDisplay show={this.state.show}>
           {" "}
-          <h1 style={{ align: "center" }}>Admin Panel</h1>
+          <h1 style={{ marginLeft: 300 }}>Admin Panel</h1>
           {this.renderTabs()}
         </ToggleDisplay>
         <ToggleDisplay show={!this.state.show}>

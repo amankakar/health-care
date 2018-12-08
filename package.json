@@ -21,6 +21,7 @@
     "react-datepicker": "^2.0.0",
     "react-dom": "^16.6.3",
     "react-hide-div": "^1.0.1",
+    "react-semantic-datetime": "^1.0.5",
     "react-toggle-display": "^2.2.0",
     "semantic-ui-calendar-react": "^0.12.1",
     "semantic-ui-css": "^2.4.1",
