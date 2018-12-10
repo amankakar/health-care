@@ -7,7 +7,15 @@ import PatientFactory from "../../build/contracts/PatientFactory.json";
 import Patient from "../../build/contracts/Patient.json";
 import DoctorFactory from "../../build/contracts/DoctorFactory.json";
 import Doctor from "../../build/contracts/Doctor.json";
-import { Card, Button, Tab, Form, Input, Dropdown } from "semantic-ui-react";
+import {
+  Card,
+  Button,
+  Tab,
+  Form,
+  Input,
+  Dropdown,
+  Table
+} from "semantic-ui-react";
 import DatetimePicker from "react-semantic-datetime";
 import moment from "moment"; //for date picker
 import { BigNumber } from "bignumber.js";
@@ -42,7 +50,13 @@ class hospitalDetails extends Component {
     date1: "",
     dateTimeOpen: false,
     patientIdArray: null,
-    doctorIdArray: null
+    doctorIdArray: null,
+    appointmentIdResult: "",
+    appointmentIdSearch: "",
+    patientIdResult: "",
+    doctorIdresult: "",
+    dateResult: "",
+    chepComplaintResult: ""
   };
   //get Address of  hospital/ Receptionist contract provided in intial props and set show contract information
   static async getInitialProps(props) {
@@ -311,7 +325,7 @@ class hospitalDetails extends Component {
     console.log("doctorlist:", doctorList.length);
     //  const patientFactoryInstance = await Factory.deployed();
     console.log("address of Doctor:", doctorInstanceAddress);
-    this.prepareDcotorDropdown();
+    this.prepareDoctorDropdown();
     // const requests = await Promise.all(
     //   Array(parseInt(requestCount))
     //     .fill()
@@ -322,9 +336,110 @@ class hospitalDetails extends Component {
   };
 
   //On appointment onSubmit
-
   onAppointmentSubmit = async event => {
+    console.log(this.state.currentPatientValue);
+    console.log(this.state.currentDoctorValue);
+    console.log(this.state.date1);
+    console.log(this.state.date);
+    console.log(moment(this.state.myDate).format("LLL"));
+    console.log(this.state.appointmentId);
+    console.log(this.state.textArea);
+    const accounts = await web3.eth.getAccounts();
+    const ContractFactory = truffleContract(ReceptionsitFactory);
+    ContractFactory.setProvider(web3.currentProvider);
+
+    const instanceFactory = await ContractFactory.deployed();
+
+    console.log(this.props.address);
+    try {
+      await instanceFactory.createAppointment(
+        this.state.appointmentId,
+        this.state.currentPatientValue,
+        this.state.currentDoctorValue,
+        moment(this.state.myDate).format("LLL"),
+        this.state.textArea,
+        // 123,
+        // 456,
+        // 567,
+        // "12/14/2018",
+        // "fhklolp",
+        { from: accounts[0] }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+
+    // const appoint = await instanceFactory.appointements.call(
+    //   parseInt(this.state.appointmentId)
+    // );
+    // this.setState({ appointmentResult: appoint });
+    // console.log(
+    //   "appointm:",
+    //   this.state.appointmentResult[0].toNumber(),
+    //   this.state.appointmentResult[1].toNumber(),
+    //   this.state.appointmentResult[2].toNumber(),
+    //   this.state.appointmentResult[3],
+    //   this.state.appointmentResult[4]
+    // );
+  };
+
+  onSearchAppointment = async event => {
     event.preventDefault();
+    const ContractFactory = truffleContract(ReceptionsitFactory);
+    ContractFactory.setProvider(web3.currentProvider);
+
+    const instanceFactory = await ContractFactory.deployed();
+    const appointmentResult = await instanceFactory.appointements.call(
+      parseInt(this.state.appointmentIdSearch)
+    );
+    console.log(appointmentResult);
+    this.setState({
+      appointmentIdResult: appointmentResult[0].toNumber(),
+      patientIdResult: appointmentResult[1].toNumber(),
+      doctorIdresult: appointmentResult[2].toNumber(),
+      dateResult: appointmentResult[3],
+      chepComplaintResult: appointmentResult[4]
+    });
+    console.log(this.state.appointmentResult);
+    return this.onSearch();
+    // return (
+    //   <div>
+    //     {this.state.appointmentResult[0].toNumber()}
+    //     {this.state.appointmentResult[1].toNumber()}
+    //     {this.state.appointmentResult[2].toNumber()}
+    //     {(this.state.appointmentResult[3], this.state.appointmentResult[4])}
+    //   </div>
+    // );
+  };
+
+  //search Result render
+  onSearch = () => {
+    if (this.state.appointmentIdResult) {
+      return (
+        <Table singleLine>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell>Appointement Id</Table.HeaderCell>
+              <Table.HeaderCell>Patient Id</Table.HeaderCell>
+              <Table.HeaderCell>Doctor Id</Table.HeaderCell>
+              <Table.HeaderCell>Date</Table.HeaderCell>
+              <Table.HeaderCell>Chep Complaint</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            <Table.Row>
+              <Table.Cell>{this.state.appointmentIdResult}</Table.Cell>
+              <Table.Cell>{this.state.patientIdResult}</Table.Cell>
+              <Table.Cell>{this.state.doctorIdresult}</Table.Cell>
+              <Table.Cell>{this.state.dateResult}</Table.Cell>
+              <Table.Cell>{this.state.chepComplaintResult}</Table.Cell>
+            </Table.Row>
+          </Table.Body>
+        </Table>
+      );
+    } else {
+      return <h1>No Record Found</h1>;
+    }
   };
   //State methods to handle state of inputs
   //Patient add form handler methods
@@ -361,6 +476,7 @@ class hospitalDetails extends Component {
 
   onAppointmentId = event => {
     this.setState({ appointmentId: event.target.value });
+    //console.log(this.state.app);
   };
   onPatientAccountHandle = event => {
     this.setState({ patientAccount: event.target.value });
@@ -385,11 +501,8 @@ class hospitalDetails extends Component {
     console.log(this.state.currentDoctorValue);
   };
 
-  onAppointmentSubmit = event => {
-    console.log(this.state.currentPatientValue);
-    console.log(this.state.currentDoctorValue);
-    console.log(this.state.date1);
-    console.log(this.state.date);
+  onAppointmentIdSearch = event => {
+    this.setState({ appointmentIdSearch: event.target.value });
   };
   //render methods to render jsx Components
   renderDropDownPatient = patienId => {
@@ -405,11 +518,11 @@ class hospitalDetails extends Component {
         value: element1
       };
     });
-    const options = patientArray.map((element1, index) => {
-      return { key: index, text: element1, value: element1 };
-    });
-    console.log("options :", options);
-    console.log("patient Array:", patientArray);
+    // const options = patientArray.map((element1, index) => {
+    //   return { key: index, text: element1, value: element1 };
+    // });
+    // console.log("options :", options);
+    // console.log("patient Array:", patientArray);
     //
     // { key: index, text:element.toNumber() , value: element.toNumber() },
     // { key: 2, text: "Choice 2", value: 2 },
@@ -438,7 +551,7 @@ class hospitalDetails extends Component {
         value: element1
       };
     });
-    console.log("patient Array:", doctorArray);
+    //  console.log("patient Array:", doctorArray);
 
     // const options = [
     //   { key: 1, text: "Choice 1", value: 1 },
@@ -456,6 +569,7 @@ class hospitalDetails extends Component {
       />
     );
   };
+
   renderTabs() {
     const panes = [
       {
@@ -585,7 +699,12 @@ class hospitalDetails extends Component {
                     }}
                     actionPosition="left"
                     value={moment(this.state.myDate).format("LLL")}
-                    onClick={() => this.setState({ dateTimeOpen: true })}
+                    onClick={event =>
+                      this.setState({
+                        dateTimeOpen: true,
+                        myDate: event.target.value
+                      })
+                    }
                     disabled={this.state.dateTimeOpen}
                     fluid
                   />
@@ -625,6 +744,28 @@ class hospitalDetails extends Component {
 
               <Button primary> Add Doctor </Button>
             </Form>
+          </Tab.Pane>
+        )
+      },
+      {
+        menuItem: "Search Appointment",
+        render: () => (
+          <Tab.Pane attached={false}>
+            <h1>Search Appointment</h1>
+            <Form onSubmit={this.onSearchAppointment}>
+              <Form.Group widths="equal">
+                <Form.Field>
+                  <label>Appointment Id</label>
+                  <Input
+                    value={this.state.appointmentIdSearch}
+                    onChange={this.onAppointmentIdSearch}
+                  />
+                </Form.Field>
+
+                <Button primary> Search Appointment </Button>
+              </Form.Group>
+            </Form>
+            {this.onSearch()}
           </Tab.Pane>
         )
       }
@@ -677,6 +818,7 @@ class hospitalDetails extends Component {
           {" "}
           <h1 style={{ marginLeft: 300 }}>Admin Panel</h1>
           {this.renderTabs()}
+          <hr />
         </ToggleDisplay>
         <ToggleDisplay show={!this.state.show}>
           {" "}

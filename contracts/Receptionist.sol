@@ -10,6 +10,18 @@ contract ReceptionsitFactory{
 
     }
 
+         struct Appointement{
+                uint appointementId;
+                uint patientId;
+                uint doctorId;
+                string date;
+                string chepComplaint;
+            }
+
+
+        mapping(uint => Appointement) public appointements;
+
+
     ReceptionSummary[] public receptionSummary;
         address[] public deployedReceptionist;
         mapping (address=>address) public accountToAddress;
@@ -33,30 +45,32 @@ contract ReceptionsitFactory{
         })  ;
         receptionSummary.push(newRecetionSummary);
     }
-function getDeployedReception() public view returns(uint){
-  return deployedReceptionist.length;
-}
-    function getReceptionList() public view returns(uint){
+      function getDeployedReception() public view returns(uint){
+           return deployedReceptionist.length;
+      }
+      function getReceptionList() public view returns(uint){
              return receptionSummary.length;
-         }
+     }
+     function createAppointment( uint _AppointementId, uint _PatientId , uint _DoctorId, string _Date , string _chepComplaint ) public  {
+          Appointement memory newAppointement = Appointement({
+              appointementId : _AppointementId,
+              patientId : _PatientId,
+              doctorId : _DoctorId,
+              date : _Date,
+              chepComplaint: _chepComplaint
+         });
+          appointements[_AppointementId] = newAppointement;
 
+         }
 
 }
 
 contract Receptionsit{
-    //Patient public patient1;
-    //Doctor public doctor1;
-    //address public patient;
-    //address public doctor;
-    //uint public date;
+
     address public manager;
     string public hospitalName;
     string public receptionistName;
-    //address [] public patientList;
-    //address [] public doctorList;
-    //address [] public listOfPatientAccount;
-    //address [] public listOfDoctorAccount;
-    //string public  _PatientName;
+
 
 
     constructor (string _hospitalName, string _receptionistName , address _manager) public {
@@ -74,4 +88,7 @@ contract Receptionsit{
         require(msg.sender == manager);
         _;
     }
+
+
+
   }
