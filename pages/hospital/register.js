@@ -9,19 +9,6 @@ import truffleContract from "truffle-contract";
 import Layout from "../../components/Layout";
 
 class register extends Component {
-  static async getInitialProps() {
-    const accountForFirstTime = await web3.eth.getAccounts();
-    console.log("acc:", accountForFirstTime[0]);
-    console.log("web3", web3);
-    return { accountForFirstTime };
-  }
-  componentDidMount = async () => {
-    // const web3 = await getWeb3();
-    // // const accounts = await web3.eth.getAccounts();
-    // this.setState({ web3 });
-    // console.log("WEB3", web3);
-  };
-
   state = {
     web3: null,
     accounts: null,
@@ -32,7 +19,8 @@ class register extends Component {
     recetionistAddress: "",
     accountForFirstTime: "",
     errorMessage: "",
-    loading: false
+    loading: false,
+    accounts: ""
   };
 
   onSubmit = async event => {
@@ -66,16 +54,18 @@ class register extends Component {
       //  var manager = await instanceFactory.manager.call();
 
       //  const receptionistInstance = await ContractReceptionist.at(address);
+      alert(accounts[0] + " will be your account for admin");
       try {
         const rec = await instanceFactory.createReceptionist(
           this.state.hospitalName,
           this.state.receptionistName,
           {
-            from: this.props.accountForFirstTime[0]
+            from: accounts[0]
           }
         );
+        alert("Registered Successfully");
       } catch (error) {
-        console.log("ERror of try:", error);
+        console.log("Error of try:", error);
         this.setState({ errorMessage: error.message });
       }
       // const recetionistAddress = await instanceFactory.accountToAddress.call(
@@ -125,7 +115,7 @@ class register extends Component {
     return (
       <Layout>
         <div>
-          <h1>Register new Recetionist</h1>
+          <h1>Register new Receptionist</h1>
           <h3>Create new Receptionist</h3>
           <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage}>
             <Form.Field>
@@ -149,7 +139,6 @@ class register extends Component {
               Register Hospital{" "}
             </Button>
           </Form>
-          <h1>Accounts: {this.props.accountForFirstTime[0]}</h1>
         </div>
       </Layout>
     );

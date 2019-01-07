@@ -3,9 +3,9 @@ import ReactDOM from "react-dom";
 import ToggleDisplay from "react-toggle-display";
 import ReceptionsitFactory from "../../build/contracts/ReceptionsitFactory.json";
 import Receptionist from "../../build/contracts/Receptionsit.json";
-import PatientFactory from "../../build/contracts/PatientFactory.json";
+//import PatientFactory from "../../build/contracts/PatientFactory.json";
 import Patient from "../../build/contracts/Patient.json";
-import DoctorFactory from "../../build/contracts/DoctorFactory.json";
+//import DoctorFactory from "../../build/contracts/DoctorFactory.json";
 import Doctor from "../../build/contracts/Doctor.json";
 import {
   Card,
@@ -14,7 +14,8 @@ import {
   Form,
   Input,
   Dropdown,
-  Table
+  Table,
+  Message
 } from "semantic-ui-react";
 import DatetimePicker from "react-semantic-datetime";
 import moment from "moment"; //for date picker
@@ -56,7 +57,11 @@ class hospitalDetails extends Component {
     patientIdResult: "",
     doctorIdresult: "",
     dateResult: "",
-    chepComplaintResult: ""
+    chepComplaintResult: "",
+    errorMessagePatient: "",
+    errorMessageDoctor: "",
+    errorMessageAppointment: "",
+    loading: false
   };
   //get Address of  hospital/ Receptionist contract provided in intial props and set show contract information
   static async getInitialProps(props) {
@@ -70,12 +75,6 @@ class hospitalDetails extends Component {
     console.log(accounts[0], "and acctual is ===:", hospitalSummary[2]);
     const optionsArray = ["one", "two", "three"];
     console.log("S", hospitalSummary);
-
-    //  console.log(Factory);
-    //PatinentContract
-    //const Contract = truffleContract(Doctor);
-    //console.log(Contract);
-    //Contract.setProvider(web3.currentProvider);
 
     return {
       address: props.query.address,
@@ -94,72 +93,24 @@ class hospitalDetails extends Component {
     const accounts = await web3.eth.getAccounts();
     console.log("account at index:", this.props.manager);
     console.log("account in metamask", accounts);
-    const Factory = truffleContract(PatientFactory);
+    const Factory = truffleContract(ReceptionsitFactory);
     //  console.log(Factory);
     Factory.setProvider(web3.currentProvider);
     console.log(Factory);
 
-    const patientFactoryInstance = await Factory.deployed();
+    const factoryInstance = await Factory.deployed();
 
-    const patientList = await patientFactoryInstance.getPatientList.call();
+    const patientList = await factoryInstance.getPatientList.call();
     this.setState({ patientIdArray: patientList });
     this.preparePatientDropDown();
-    const FactoryDoctor = truffleContract(DoctorFactory);
-    //  console.log(Factory);
-    FactoryDoctor.setProvider(web3.currentProvider);
-    console.log(FactoryDoctor);
 
-    const doctorFactoryInstance = await FactoryDoctor.deployed();
-
-    const doctorList = await doctorFactoryInstance.getDoctorList.call();
+    const doctorList = await factoryInstance.getDoctorList.call();
     this.setState({ doctorIdArray: doctorList });
     this.prepareDoctorDropdown();
-    // const FactoryDoctor = truffleContract(DoctorFactory);
-    // //  console.log(Factory);
-    // FactoryDoctor.setProvider(web3.currentProvider);
-    // const doctorFactoryInstance = await FactoryDoctor.deployed();
-    // const doctorList = await doctorFactoryInstance.getDoctorList.call();
-    // this.setState({ doctorIdArray: doctorList });
-    //console.log("patientList:", patientList.length);
+
     if (this.props.manager === accounts[0]) {
       this.setState({ show: !this.state.show });
-      //this.renderDropDownPatient();
-      //Patient factory
-      // const Factory = truffleContract(PatientFactory);
-      // //  console.log(Factory);
-      // Factory.setProvider(web3.currentProvider);
-      // //  console.log(Factory);
-      // //PatinentContract
-      // const Contract = truffleContract(Patient);
-      // //console.log(Contract);
-      // Contract.setProvider(web3.currentProvider);
-      // //  console.log(Contract);
-      // const patientFactoryInstance = await Factory.deployed();
-      // //console.log("RESULT:", patientFactoryInstance.address);
-      // try {
-      //   const result = await patientFactoryInstance.addPatient(
-      //     1,
-      //     "Aman",
-      //     "Male",
-      //     24,
-      //     accounts[0],
-      //     { from: accounts[0] }
-      //   );
-      //   console.log("RESULT:", result);
-      // } catch (error) {
-      //   console.error(error);
-      // }
-      //
-      // const patientId = await patientFactoryInstance.patientIdToAddress.call(1);
-      // //  const patientFactoryInstance = await Factory.deployed();
-      // console.log("address of patient:", patientId);
-      //
-      // // console.log("Address of Patient", patientId.address);
-      // console.log(patientFactoryInstance.address);
-      //
-      // const man = await patientFactoryInstance.manager.call();
-      // console.log(man);
-      // // this.setState({ patientId: ["aman", "khan"] });
+
       console.log("ISADMIn:", this.state.show);
     } else {
       this.setState({ show: false });
@@ -174,7 +125,7 @@ class hospitalDetails extends Component {
   //Add Patient
   addPatient = async () => {
     //const { patientFactoryInstance } = this.props;
-    const Factory = truffleContract(PatientFactory);
+    const Factory = truffleContract(ReceptionsitFactory);
     //  console.log(Factory);
     Factory.setProvider(web3.currentProvider);
     console.log(Factory);
@@ -183,13 +134,14 @@ class hospitalDetails extends Component {
     //console.log(Contract);
     Contract.setProvider(web3.currentProvider);
     //  console.log(Contract);
-    const patientFactoryInstance = await Factory.deployed();
-    console.log("RESULT:", patientFactoryInstance.address);
+    const factoryInstance = await Factory.deployed();
+    console.log("RESULT:", factoryInstance.address);
 
     try {
       const accounts = await web3.eth.getAccounts();
+      this.setState({ loading: true, errorMessagePatient: "" });
 
-      const result = await patientFactoryInstance.addPatient(
+      const result = await factoryInstance.addPatient(
         // 1,
         // "Aman",
         // "Male",
@@ -202,45 +154,31 @@ class hospitalDetails extends Component {
         this.state.patientAccount,
         { from: accounts[0] }
       );
+      alert("Patient Added Successfully");
       console.log("RESULT:", result);
     } catch (error) {
       console.error(error);
+      this.setState({ errorMessagePatient: error.message });
     }
+    this.setState({ loading: false });
 
-    const patientinstanceAddress = await patientFactoryInstance.patientIdToAddress.call(
+    const patientinstanceAddress = await factoryInstance.patientIdToAddress.call(
       this.state.patientId
     );
     const patientInstance = await Contract.at(patientinstanceAddress);
 
     const summary = await patientInstance.getSummary.call(this.state.patientId);
     console.log("summary:", summary);
-    //  const patientFactoryInstance = await Factory.deployed();
     console.log("address of patient:", patientinstanceAddress);
     this.preparePatientDropDown();
-    // const patientList = await patientFactoryInstance.getPatientList.call();
-    // const patient = await Promise.all(
-    //   Array(parseInt(patientList))
-    //     .fill()
-    //     .map((element, index) => {
-    //       return patientFactoryInstance.patientId.call(index);
-    //       // .then((element , index)=>{
-    //       //
-    //       // })
-    //       // ;
-    //     })
-    // );
-    // console.log("Patient list:", patient);
-    // this.setState({ patientIdArray: patient });
-    //
-    // console.log("patientList:", this.state.patientIdArray);
   };
   //prepare dropdown for patient
   async preparePatientDropDown() {
-    const FactoryPatient = truffleContract(PatientFactory);
+    const Factory = truffleContract(ReceptionsitFactory);
     //  console.log(Factory);
-    FactoryPatient.setProvider(web3.currentProvider);
+    Factory.setProvider(web3.currentProvider);
 
-    const patientFactoryInstance = await FactoryPatient.deployed();
+    const patientFactoryInstance = await Factory.deployed();
 
     const patientList = await patientFactoryInstance.getPatientList.call();
     const patient = await Promise.all(
@@ -248,10 +186,6 @@ class hospitalDetails extends Component {
         .fill()
         .map((element, index) => {
           return patientFactoryInstance.patientId.call(index);
-          // .then((element , index)=>{
-          //
-          // })
-          // ;
         })
     );
     console.log("Patient list:", patient);
@@ -262,11 +196,11 @@ class hospitalDetails extends Component {
 
   //prepare dropdown for doctor id
   async prepareDoctorDropdown() {
-    const FactoryDoctor = truffleContract(DoctorFactory);
+    const Factory = truffleContract(ReceptionsitFactory);
     //  console.log(Factory);
-    FactoryDoctor.setProvider(web3.currentProvider);
+    Factory.setProvider(web3.currentProvider);
 
-    const doctorFactoryInstance = await FactoryDoctor.deployed();
+    const doctorFactoryInstance = await Factory.deployed();
 
     const doctorList = await doctorFactoryInstance.getDoctorList.call();
     const doctor = await Promise.all(
@@ -274,10 +208,6 @@ class hospitalDetails extends Component {
         .fill()
         .map((element, index) => {
           return doctorFactoryInstance.doctorId.call(index);
-          // .then((element , index)=>{
-          //
-          // })
-          // ;
         })
     );
     console.log("Doctor list:", doctor);
@@ -287,16 +217,17 @@ class hospitalDetails extends Component {
   }
   //Add Doctor
   addDoctor = async event => {
-    const FactoryDoctor = truffleContract(DoctorFactory);
+    const Factory = truffleContract(ReceptionsitFactory);
     //  console.log(Factory);
-    FactoryDoctor.setProvider(web3.currentProvider);
+    Factory.setProvider(web3.currentProvider);
 
-    const doctorFactoryInstance = await FactoryDoctor.deployed();
+    const factoryInstance = await Factory.deployed();
 
     try {
       const accounts = await web3.eth.getAccounts();
+      this.setState({ loading: true, errorMessageDoctor: "" });
 
-      const result = await doctorFactoryInstance.addDoctor(
+      const result = await factoryInstance.addDoctor(
         // 1,
         // "Aman",
         // "Male",
@@ -309,30 +240,26 @@ class hospitalDetails extends Component {
         this.state.doctorAccount,
         { from: accounts[0] }
       );
+      alert("Doctor Added Successfully");
       console.log("RESULT:", result);
     } catch (error) {
       console.error(error);
+      this.setState({ errorMessageDoctor: error.message });
     }
+    this.setState({ loading: false });
 
-    const doctorInstanceAddress = await doctorFactoryInstance.doctorIdToAddress.call(
+    const doctorInstanceAddress = await factoryInstance.doctorIdToAddress.call(
       this.state.doctorId
     );
     //const doctorInstance = await Contract.at(doctorInstanceAddress);
     //
     // const summary = await doctorInstance.getSummary.call(this.state.doctorId);
     // console.log("summary:", summary);
-    const doctorList = await doctorFactoryInstance.getDoctorList.call();
+    const doctorList = await factoryInstance.getDoctorList.call();
     console.log("doctorlist:", doctorList.length);
     //  const patientFactoryInstance = await Factory.deployed();
     console.log("address of Doctor:", doctorInstanceAddress);
     this.prepareDoctorDropdown();
-    // const requests = await Promise.all(
-    //   Array(parseInt(requestCount))
-    //     .fill()
-    //     .map((element, index) => {
-    //       return campaign.methods.requests(index).call();
-    //     })
-    // );
   };
 
   //On appointment onSubmit
@@ -352,6 +279,8 @@ class hospitalDetails extends Component {
 
     console.log(this.props.address);
     try {
+      this.setState({ loading: true, errorMessageAppointment: "" });
+
       await instanceFactory.createAppointment(
         this.state.appointmentId,
         this.state.currentPatientValue,
@@ -367,20 +296,9 @@ class hospitalDetails extends Component {
       );
     } catch (err) {
       console.error(err);
+      this.setState({ errorMessageAppointment: err.message });
     }
-
-    // const appoint = await instanceFactory.appointements.call(
-    //   parseInt(this.state.appointmentId)
-    // );
-    // this.setState({ appointmentResult: appoint });
-    // console.log(
-    //   "appointm:",
-    //   this.state.appointmentResult[0].toNumber(),
-    //   this.state.appointmentResult[1].toNumber(),
-    //   this.state.appointmentResult[2].toNumber(),
-    //   this.state.appointmentResult[3],
-    //   this.state.appointmentResult[4]
-    // );
+    this.setState({ loading: false });
   };
 
   onSearchAppointment = async event => {
@@ -402,14 +320,6 @@ class hospitalDetails extends Component {
     });
     console.log(this.state.appointmentResult);
     return this.onSearch();
-    // return (
-    //   <div>
-    //     {this.state.appointmentResult[0].toNumber()}
-    //     {this.state.appointmentResult[1].toNumber()}
-    //     {this.state.appointmentResult[2].toNumber()}
-    //     {(this.state.appointmentResult[3], this.state.appointmentResult[4])}
-    //   </div>
-    // );
   };
 
   //search Result render
@@ -423,7 +333,7 @@ class hospitalDetails extends Component {
               <Table.HeaderCell>Patient Id</Table.HeaderCell>
               <Table.HeaderCell>Doctor Id</Table.HeaderCell>
               <Table.HeaderCell>Date</Table.HeaderCell>
-              <Table.HeaderCell>Chep Complaint</Table.HeaderCell>
+              <Table.HeaderCell>Chief Complaint</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -444,14 +354,18 @@ class hospitalDetails extends Component {
   //State methods to handle state of inputs
   //Patient add form handler methods
   onPatientIdHandle = event => {
-    this.setState({ patientId: event.target.value });
+    const re = /^[0-9\b]+$/;
+    if (event.target.value === "" || re.test(event.target.value)) {
+      this.setState({ patientId: event.target.value });
+    }
   };
   onPatientHandle = event => {
     this.setState({ patientName: event.target.value });
   };
 
-  onGenderHandle = event => {
-    this.setState({ patientGender: event.target.value });
+  onGenderPatientHandle = (event, { value }) => {
+    this.setState({ patientGender: value });
+    console.log(this.state.patientGender);
   };
 
   onAgeHandle = event => {
@@ -460,7 +374,10 @@ class hospitalDetails extends Component {
 
   //Doctor form handler mathodes
   onDoctorIdHandle = event => {
-    this.setState({ doctorId: event.target.value });
+    const re = /^[0-9\b]+$/;
+    if (event.target.value === "" || re.test(event.target.value)) {
+      this.setState({ doctorId: event.target.value });
+    }
   };
   onDoctorHandle = event => {
     this.setState({ doctorName: event.target.value });
@@ -470,12 +387,15 @@ class hospitalDetails extends Component {
     this.setState({ doctorQualification: event.target.value });
   };
 
-  onGenderDoctorHandle = event => {
-    this.setState({ doctorGender: event.target.value });
+  onGenderDoctorHandle = (event, { value }) => {
+    this.setState({ doctorGender: value });
   };
 
   onAppointmentId = event => {
-    this.setState({ appointmentId: event.target.value });
+    const re = /^[0-9\b]+$/;
+    if (event.target.value === "" || re.test(event.target.value)) {
+      this.setState({ appointmentId: event.target.value });
+    }
     //console.log(this.state.app);
   };
   onPatientAccountHandle = event => {
@@ -502,7 +422,10 @@ class hospitalDetails extends Component {
   };
 
   onAppointmentIdSearch = event => {
-    this.setState({ appointmentIdSearch: event.target.value });
+    const re = /^[0-9\b]+$/;
+    if (event.target.value === "" || re.test(event.target.value)) {
+      this.setState({ appointmentIdSearch: event.target.value });
+    }
   };
   //render methods to render jsx Components
   renderDropDownPatient = patienId => {
@@ -534,6 +457,7 @@ class hospitalDetails extends Component {
         options={patientArray}
         selection
         search
+        required
         value={currentPatientValue}
         onChange={this.handlePatientChange}
       />
@@ -551,25 +475,60 @@ class hospitalDetails extends Component {
         value: element1
       };
     });
-    //  console.log("patient Array:", doctorArray);
-
-    // const options = [
-    //   { key: 1, text: "Choice 1", value: 1 },
-    //   { key: 2, text: "Choice 2", value: 2 },
-    //   { key: 3, text: "Choice 3", value: 3 }
-    // ];
-    // console.log("OPTIONS:", options);
+    console.log("patient Array:", doctorArray);
+    const options = [
+      { key: 1, text: "Choice 1", value: 1 },
+      { key: 2, text: "Choice 2", value: 2 },
+      { key: 3, text: "Choice 3", value: 3 }
+    ];
+    console.log("OPTIONS:", options);
     return (
       <Dropdown
         clearable
         options={doctorArray}
         selection
+        search
         value={currentDoctorValue}
         onChange={this.handleDoctorChange}
       />
     );
   };
 
+  genderPatientRender = () => {
+    const options = [
+      { key: 1, text: "Male", value: "Male" },
+      { key: 2, text: "Female", value: "Female" },
+      { key: 3, text: "Other", value: "Other" }
+    ];
+    return (
+      <Dropdown
+        clearable
+        options={options}
+        selection
+        search
+        value={this.state.patientGender}
+        onChange={this.onGenderPatientHandle}
+      />
+    );
+  };
+
+  genderDoctorRender = () => {
+    const options = [
+      { key: 1, text: "Male", value: "Male" },
+      { key: 2, text: "Female", value: "Female" },
+      { key: 3, text: "Other", value: "Other" }
+    ];
+    return (
+      <Dropdown
+        clearable
+        options={options}
+        selection
+        search
+        value={this.state.doctorGender}
+        onChange={this.onGenderDoctorHandle}
+      />
+    );
+  };
   renderTabs() {
     const panes = [
       {
@@ -577,7 +536,10 @@ class hospitalDetails extends Component {
         render: () => (
           <Tab.Pane attached={false}>
             <h1>Patient Information</h1>
-            <Form onSubmit={this.addPatient}>
+            <Form
+              onSubmit={this.addPatient}
+              error={!!this.state.errorMessagePatient}
+            >
               <Form.Group widths="equal">
                 <Form.Field>
                   <label>Patient ID</label>
@@ -597,10 +559,7 @@ class hospitalDetails extends Component {
               <Form.Group widths="equal">
                 <Form.Field>
                   <label>Patient Gender</label>
-                  <Input
-                    value={this.state.patientGender}
-                    onChange={this.onGenderHandle}
-                  />
+                  {this.genderPatientRender()}
                 </Form.Field>
                 <Form.Field>
                   <label>Patient Age</label>
@@ -618,7 +577,16 @@ class hospitalDetails extends Component {
                   onChange={this.onPatientAccountHandle}
                 />
               </Form.Field>
-              <Button primary> Add Patient </Button>
+              <Message
+                error
+                header="Oops..!"
+                content={this.state.errorMessagePatient}
+              />
+
+              <Button loading={this.state.loading} primary>
+                {" "}
+                Add Patient{" "}
+              </Button>
             </Form>
           </Tab.Pane>
         )
@@ -650,10 +618,7 @@ class hospitalDetails extends Component {
               <Form.Group widths="equal">
                 <Form.Field>
                   <label>Doctor Gender</label>
-                  <Input
-                    value={this.state.doctorGender}
-                    onChange={this.onGenderDoctorHandle}
-                  />
+                  {this.genderDoctorRender()}
                 </Form.Field>
                 <Form.Field>
                   <label>Doctor Qualification</label>
@@ -670,7 +635,15 @@ class hospitalDetails extends Component {
                   onChange={this.onDoctorAccountHandle}
                 />
               </Form.Field>
-              <Button primary> Add Doctor </Button>
+              <Message
+                error
+                header="Oops..!"
+                content={this.state.errorMessageDoctor}
+              />
+              <Button loading={this.state.loading} primary>
+                {" "}
+                Add Doctor{" "}
+              </Button>
             </Form>
           </Tab.Pane>
         )
@@ -741,8 +714,15 @@ class hospitalDetails extends Component {
                   onChange={this.onTextArea}
                 />
               </Form.Field>
-
-              <Button primary> Add Doctor </Button>
+              <Message
+                error
+                header="Oops..!"
+                content={this.state.errorMessageAppointment}
+              />
+              <Button loading={this.state.loading} primary>
+                {" "}
+                Create Appointment{" "}
+              </Button>
             </Form>
           </Tab.Pane>
         )
@@ -815,13 +795,11 @@ class hospitalDetails extends Component {
         </div>
         <hr />
         <ToggleDisplay show={this.state.show}>
-          {" "}
           <h1 style={{ marginLeft: 300 }}>Admin Panel</h1>
           {this.renderTabs()}
           <hr />
         </ToggleDisplay>
         <ToggleDisplay show={!this.state.show}>
-          {" "}
           <div>
             <h1 style={{ color: "red" }}>{this.state.notAdmin}</h1>
           </div>

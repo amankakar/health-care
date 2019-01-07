@@ -1,44 +1,30 @@
 pragma solidity ^0.4.24;
-
-contract PatientFactory{
-       mapping (address=>address) public accountToAddress;
-       mapping (uint => address)  public patientIdToAddress;
-       mapping(uint=>bool) public checkPatientId;
-
-       uint[] public patientId;
-       address public manager;
-       constructor(){
-         manager= msg.sender;
-       }
-    function addPatient(uint _PatientId , string _patientName , string _gender , uint _age , address _account) public {
-        require(!checkPatientId[_PatientId]);
-        address newPatient = new Patient(_PatientId , _patientName , _gender , _age , _account);
-        accountToAddress[_account] = newPatient;
-        patientIdToAddress[_PatientId] = newPatient;
-        patientId.push(_PatientId);
-        checkPatientId[_PatientId]=true;
-
-
-    }
-
-    function getPatientList() public view returns(uint){
-      return patientId.length;
-  }
-    // function getAddress(string _patientId) public view returns(address){
-    //     return(patientIdToAddress[_patientId]);
-    // }
-
-}
-
-
+import "./Receptionist.sol";
 contract Patient{
 
+    ReceptionsitFactory factory;
     string public patientName;
     uint public patientId;
     string public gender;
     uint public age;
     address public manager;
-    constructor( uint _PatientId  , string _patientName, string _gender, uint _age , address _account) public{
+    mapping(uint => bool) public doctorApproval;
+
+    struct Appointment{
+        uint appointmentId;
+        uint patientId;
+        uint doctorId;
+        string date;
+        string chiefComplaint;
+        string hash;
+        bool completed;
+    }
+    uint[] public appointmentsList;
+
+
+    mapping(uint=>Appointment) public appointments;
+
+    constructor( uint _PatientId  , string _patientName, string _gender, uint _age , address _account){
         patientName = _patientName;
         gender = _gender;
         age = _age;
@@ -47,20 +33,61 @@ contract Patient{
 
     }
 
+
     function getManager() public view returns(address){
         return (manager);
     }
 
 
-      function getPatientName() public view returns(string){
+      function getPatientName() public view returns( string){
           return(patientName);
       }
-      function getSummary(uint _PatientId) public view returns(uint , string , string , uint , address){
-        return(patientId , patientName , gender , age , manager);
-      }
-    function viewAppointments() public pure{
 
+
+      function addAppointment(uint _AppointmentId, uint _PatientId , uint _DoctorId , string _Date , string _chiefComplaint) public{
+          Appointment memory newAppointment = Appointment({
+              appointmentId : _AppointmentId ,
+              patientId : _PatientId ,
+              doctorId : _DoctorId ,
+              date : _Date ,
+              chiefComplaint : _chiefComplaint,
+              hash : '',
+              completed: false
+
+
+          });
+
+          appointments[_AppointmentId]=newAppointment;
+
+          appointmentsList.push(_AppointmentId);
+      }
+
+
+    function getSummary(uint _PatientId) public view returns(uint , string , string , uint , address){
+              return(patientId , patientName , gender , age , manager);
+            }
+
+
+    function addPrescription(uint appointmentId , string prescription) public returns(uint){
+            appointments[appointmentId].hash = prescription;
+            appointments[appointmentId].completed = true;
 
     }
 
+    function getAppointmentList() public view returns(uint){
+        return appointmentsList.length;
+    }
+
+
+    function addDoctorApproval(uint doctorId) public{
+            doctorApproval[doctorId] = true;
+        }
+    function blockDoctor(uint doctorId) public{
+        doctorApproval[doctorId] = false;
+    }
+
+    function restricted(uint doctorId) public{
+        require(doctorApproval[doctorId]);
+
+    }
 }
