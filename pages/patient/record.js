@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Document, Page } from "react-pdf";
 import { Grid, Segment } from "semantic-ui-react";
-
+import Layout from "../../components/patientLayout";
 class Record extends Component {
   state = {
     ipfs: "",
@@ -20,44 +20,47 @@ class Record extends Component {
     const { pageNumber, numPages } = this.state;
 
     return (
-      <div style={{ backgroundColor: "#696969" }}>
-        <h1>Patient Record</h1>
+      <Layout>
+        <div style={{ backgroundColor: "#696969" }}>
+          <h1>Patient Record</h1>
 
-        <h2>hash is {this.props.hash}</h2>
+          <h2>hash is {this.props.hash}</h2>
 
-        <div style={{ marginLeft: 450 }}>
           <div style={{ marginLeft: 200 }}>
-            <button
-              onClick={() =>
-                this.setState(prevState => ({
-                  pageNumber: prevState.pageNumber - 1
-                }))
-              }
-            >
-              Previous page
-            </button>
-            <button
-              onClick={() =>
-                this.setState(prevState => ({
-                  pageNumber: prevState.pageNumber + 1
-                }))
-              }
-            >
-              Next page
-            </button>
-          </div>
-          <Document
-            file={`https://ipfs.io/ipfs/${this.props.hash}`}
-            onLoadSuccess={this.onDocumentLoad}
-          >
-            <div style={{ color: "white", textAlign: "center" }}>
-              <p>
-                <Page pageNumber={pageNumber} /> page {pageNumber} of {numPages}
-              </p>
+            <div style={{ marginLeft: 200 }}>
+              <button
+                onClick={() =>
+                  this.setState(prevState => ({
+                    pageNumber: prevState.pageNumber - 1
+                  }))
+                }
+              >
+                Previous page
+              </button>
+              <button
+                onClick={() =>
+                  this.setState(prevState => ({
+                    pageNumber: prevState.pageNumber + 1
+                  }))
+                }
+              >
+                Next page
+              </button>
             </div>
-          </Document>
+            <Document
+              file={`https://ipfs.io/ipfs/${this.props.hash}`}
+              onLoadSuccess={this.onDocumentLoad}
+            >
+              <div style={{ color: "white", textAlign: "center" }}>
+                <p>
+                  <Page pageNumber={pageNumber} /> page {pageNumber} of{" "}
+                  {numPages}
+                </p>
+              </div>
+            </Document>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 }

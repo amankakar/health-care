@@ -136,41 +136,51 @@ class hospitalDetails extends Component {
     //  console.log(Contract);
     const factoryInstance = await Factory.deployed();
     console.log("RESULT:", factoryInstance.address);
+    if (
+      this.state.patientId == "" ||
+      this.state.patientId == 1 ||
+      this.state.patientAccount == "" ||
+      this.state.patientAccount == 0
+    ) {
+      alert("Please provide patient id and account");
+    } else {
+      try {
+        const accounts = await web3.eth.getAccounts();
+        this.setState({ loading: true, errorMessagePatient: "" });
 
-    try {
-      const accounts = await web3.eth.getAccounts();
-      this.setState({ loading: true, errorMessagePatient: "" });
+        const result = await factoryInstance.addPatient(
+          // 1,
+          // "Aman",
+          // "Male",
+          // 24,
+          // accounts[0],
+          this.state.patientId,
+          this.state.patientName,
+          this.state.patientGender,
+          this.state.patientAge,
+          this.state.patientAccount,
+          { from: accounts[0] }
+        );
+        alert("Patient Added Successfully");
+        console.log("RESULT:", result);
+      } catch (error) {
+        console.error(error);
+        this.setState({ errorMessagePatient: error.message });
+      }
+      this.setState({ loading: false });
 
-      const result = await factoryInstance.addPatient(
-        // 1,
-        // "Aman",
-        // "Male",
-        // 24,
-        // accounts[0],
-        this.state.patientId,
-        this.state.patientName,
-        this.state.patientGender,
-        this.state.patientAge,
-        this.state.patientAccount,
-        { from: accounts[0] }
+      const patientinstanceAddress = await factoryInstance.patientIdToAddress.call(
+        this.state.patientId
       );
-      alert("Patient Added Successfully");
-      console.log("RESULT:", result);
-    } catch (error) {
-      console.error(error);
-      this.setState({ errorMessagePatient: error.message });
+      const patientInstance = await Contract.at(patientinstanceAddress);
+
+      const summary = await patientInstance.getSummary.call(
+        this.state.patientId
+      );
+      console.log("summary:", summary);
+      console.log("address of patient:", patientinstanceAddress);
+      this.preparePatientDropDown();
     }
-    this.setState({ loading: false });
-
-    const patientinstanceAddress = await factoryInstance.patientIdToAddress.call(
-      this.state.patientId
-    );
-    const patientInstance = await Contract.at(patientinstanceAddress);
-
-    const summary = await patientInstance.getSummary.call(this.state.patientId);
-    console.log("summary:", summary);
-    console.log("address of patient:", patientinstanceAddress);
-    this.preparePatientDropDown();
   };
   //prepare dropdown for patient
   async preparePatientDropDown() {
@@ -222,44 +232,52 @@ class hospitalDetails extends Component {
     Factory.setProvider(web3.currentProvider);
 
     const factoryInstance = await Factory.deployed();
+    if (
+      this.state.doctorId == "" ||
+      this.state.doctorId == 2 ||
+      this.state.doctorAccount == "" ||
+      this.state.doctorAccount == 0
+    ) {
+      alert("Please provide doctor id and account");
+    } else {
+      try {
+        const accounts = await web3.eth.getAccounts();
+        this.setState({ loading: true, errorMessageDoctor: "" });
 
-    try {
-      const accounts = await web3.eth.getAccounts();
-      this.setState({ loading: true, errorMessageDoctor: "" });
+        const result = await factoryInstance.addDoctor(
+          // 1,
+          // "Aman",
+          // "Male",
+          // 24,
+          // accounts[0],
+          this.state.doctorId,
+          this.state.doctorName,
+          this.state.doctorGender,
+          this.state.doctorQualification,
+          this.state.doctorAccount,
+          { from: accounts[0] }
+        );
+        alert("Doctor Added Successfully");
+        console.log("RESULT:", result);
+      } catch (error) {
+        console.error(error);
+        this.setState({ errorMessageDoctor: error.message });
+      }
+      this.setState({ loading: false });
 
-      const result = await factoryInstance.addDoctor(
-        // 1,
-        // "Aman",
-        // "Male",
-        // 24,
-        // accounts[0],
-        this.state.doctorId,
-        this.state.doctorName,
-        this.state.doctorGender,
-        this.state.doctorQualification,
-        this.state.doctorAccount,
-        { from: accounts[0] }
+      const doctorInstanceAddress = await factoryInstance.doctorIdToAddress.call(
+        this.state.doctorId
       );
-      alert("Doctor Added Successfully");
-      console.log("RESULT:", result);
-    } catch (error) {
-      console.error(error);
-      this.setState({ errorMessageDoctor: error.message });
+      //const doctorInstance = await Contract.at(doctorInstanceAddress);
+      //
+      // const summary = await doctorInstance.getSummary.call(this.state.doctorId);
+      // console.log("summary:", summary);
+      const doctorList = await factoryInstance.getDoctorList.call();
+      console.log("doctorlist:", doctorList.length);
+      //  const patientFactoryInstance = await Factory.deployed();
+      console.log("address of Doctor:", doctorInstanceAddress);
+      this.prepareDoctorDropdown();
     }
-    this.setState({ loading: false });
-
-    const doctorInstanceAddress = await factoryInstance.doctorIdToAddress.call(
-      this.state.doctorId
-    );
-    //const doctorInstance = await Contract.at(doctorInstanceAddress);
-    //
-    // const summary = await doctorInstance.getSummary.call(this.state.doctorId);
-    // console.log("summary:", summary);
-    const doctorList = await factoryInstance.getDoctorList.call();
-    console.log("doctorlist:", doctorList.length);
-    //  const patientFactoryInstance = await Factory.deployed();
-    console.log("address of Doctor:", doctorInstanceAddress);
-    this.prepareDoctorDropdown();
   };
 
   //On appointment onSubmit
@@ -278,27 +296,37 @@ class hospitalDetails extends Component {
     const instanceFactory = await ContractFactory.deployed();
 
     console.log(this.props.address);
-    try {
-      this.setState({ loading: true, errorMessageAppointment: "" });
-
-      await instanceFactory.createAppointment(
-        this.state.appointmentId,
-        this.state.currentPatientValue,
-        this.state.currentDoctorValue,
-        moment(this.state.myDate).format("LLL"),
-        this.state.textArea,
-        // 123,
-        // 456,
-        // 567,
-        // "12/14/2018",
-        // "fhklolp",
-        { from: accounts[0] }
-      );
-    } catch (err) {
-      console.error(err);
-      this.setState({ errorMessageAppointment: err.message });
+    const date = moment(this.state.muDate).format("LLL");
+    if (this.state.appointmentId == "") {
+      alert("please provide appointementId");
+    } else {
+      try {
+        this.setState({ loading: true, errorMessageAppointment: "" });
+        await instanceFactory.createAppointment(
+          this.state.appointmentId,
+          this.state.currentPatientValue,
+          this.state.currentDoctorValue,
+          moment(this.state.myDate).format("LLL"),
+          this.state.textArea,
+          // 123,
+          // 456,
+          // 567,
+          // "12/14/2018",
+          // "fhklolp",
+          { from: accounts[0] }
+        );
+        alert(
+          "Appointment Created  and appointment Id :" +
+            this.state.appointmentId +
+            "Date of appintment is :" +
+            date
+        );
+      } catch (err) {
+        console.error(err);
+        this.setState({ errorMessageAppointment: err.message });
+      }
+      this.setState({ loading: false });
     }
-    this.setState({ loading: false });
   };
 
   onSearchAppointment = async event => {
@@ -360,7 +388,10 @@ class hospitalDetails extends Component {
     }
   };
   onPatientHandle = event => {
-    this.setState({ patientName: event.target.value });
+    const re = /^[A-Za-z ]+$/;
+    if (event.target.value === "" || re.test(event.target.value)) {
+      this.setState({ patientName: event.target.value });
+    }
   };
 
   onGenderPatientHandle = (event, { value }) => {
@@ -369,7 +400,10 @@ class hospitalDetails extends Component {
   };
 
   onAgeHandle = event => {
-    this.setState({ patientAge: event.target.value });
+    const re = /^[0-9\b]+$/;
+    if (event.target.value === "" || re.test(event.target.value)) {
+      this.setState({ patientAge: event.target.value });
+    }
   };
 
   //Doctor form handler mathodes
@@ -380,11 +414,17 @@ class hospitalDetails extends Component {
     }
   };
   onDoctorHandle = event => {
-    this.setState({ doctorName: event.target.value });
+    const re = /^[A-Za-z ]+$/;
+    if (event.target.value === "" || re.test(event.target.value)) {
+      this.setState({ doctorName: event.target.value });
+    }
   };
 
   onQualificationHandle = event => {
-    this.setState({ doctorQualification: event.target.value });
+    const re = /^[A-Za-z ]+$/;
+    if (event.target.value === "" || re.test(event.target.value)) {
+      this.setState({ doctorQualification: event.target.value });
+    }
   };
 
   onGenderDoctorHandle = (event, { value }) => {
@@ -529,6 +569,7 @@ class hospitalDetails extends Component {
       />
     );
   };
+
   renderTabs() {
     const panes = [
       {
@@ -541,7 +582,7 @@ class hospitalDetails extends Component {
               error={!!this.state.errorMessagePatient}
             >
               <Form.Group widths="equal">
-                <Form.Field>
+                <Form.Field required>
                   <label>Patient ID</label>
                   <Input
                     value={this.state.patientId}
@@ -570,7 +611,7 @@ class hospitalDetails extends Component {
                 </Form.Field>
               </Form.Group>
 
-              <Form.Field>
+              <Form.Field required>
                 <label>Account</label>
                 <Input
                   value={this.state.patientAccount}
@@ -597,9 +638,12 @@ class hospitalDetails extends Component {
           <Tab.Pane attached={false}>
             <h1>Doctor Information</h1>
 
-            <Form onSubmit={this.addDoctor}>
+            <Form
+              onSubmit={this.addDoctor}
+              error={!!this.state.errorMessageDoctor}
+            >
               <Form.Group widths="equal">
-                <Form.Field>
+                <Form.Field required>
                   <label>Doctor ID</label>
                   <Input
                     value={this.state.doctorId}
@@ -628,7 +672,7 @@ class hospitalDetails extends Component {
                   />
                 </Form.Field>
               </Form.Group>
-              <Form.Field>
+              <Form.Field required>
                 <label>Account</label>
                 <Input
                   value={this.state.doctorAccount}
@@ -653,9 +697,12 @@ class hospitalDetails extends Component {
         render: () => (
           <Tab.Pane attached={false}>
             <h1>Create Appointment</h1>
-            <Form onSubmit={this.onAppointmentSubmit}>
+            <Form
+              onSubmit={this.onAppointmentSubmit}
+              error={!!this.state.errorMessageAppointment}
+            >
               <Form.Group widths="equal">
-                <Form.Field>
+                <Form.Field required>
                   <label>Appointment Id</label>
                   <Input
                     value={this.state.appointmentId}

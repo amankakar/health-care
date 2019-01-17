@@ -1,8 +1,11 @@
 import React, { Component } from "react";
-import Layout from "../../components/patientLayout";
+import Layout from "../../components/doctorLayout";
 import web3 from "../../ethereum/web3";
 import Factory from "../../build/contracts/ReceptionsitFactory.json";
 import Doctor from "../../build/contracts/Doctor.json";
+import Patient from "../../build/contracts/Patient.json";
+import AppointmentRow from "../../components/AppointmentRow";
+import { Link } from "../../routes";
 import truffleContract from "truffle-contract";
 import {
   Card,
@@ -27,7 +30,11 @@ class doctor extends Component {
     isCheckTrue: false,
     buffer: "",
     errorMessage: "",
-    loading: false
+    loading: false,
+    patientId: "",
+    instancePatient: "",
+    appointmentListData: "",
+    doctorApproved: false
   };
 
   static async getInitialProps() {
@@ -37,6 +44,8 @@ class doctor extends Component {
     factory.setProvider(web3.currentProvider);
     const instanceFactory = await factory.deployed();
     const doctor = truffleContract(Doctor);
+    const patient = truffleContract(Patient);
+    patient.setProvider(web3.currentProvider);
     doctor.setProvider(web3.currentProvider);
 
     const doctorAddress = await instanceFactory.accountToAddressDoctor.call(
@@ -50,8 +59,10 @@ class doctor extends Component {
       const summary = await instanceDoctor.getSummary.call(doctorId);
 
       return {
+        patient: patient,
         doctorAddress: doctorAddress,
         doctor: instanceDoctor,
+        instanceFactory: instanceFactory,
         doctorId: summary[0].toNumber(),
         doctorName: summary[1],
         doctorGender: summary[2],
@@ -68,6 +79,13 @@ class doctor extends Component {
       this.setState({ appointmentIdForFile: e.target.value });
     }
     console.log(this.state.appointmentIdForFile);
+  };
+
+  onPatientId = e => {
+    const re = /^[0-9\b]+$/;
+    if (e.target.value === "" || re.test(e.target.value)) {
+      this.setState({ patientId: e.target.value });
+    }
   };
   onAppointmentIdSearch = event => {
     this.setState({ appointmentIdSearch: event.target.value });
@@ -179,6 +197,28 @@ class doctor extends Component {
     }
   };
 
+  onSumbitPatientId = async event => {
+    event.preventDefault();
+    const instanceFactory = this.props.instanceFactory;
+    const patient = this.props.patient;
+    const patientAddress = await instanceFactory.patientIdToAddress.call(
+      parseInt(this.state.patientId)
+    );
+    if (patientAddress == 0x0000000000000000000000000000000000000000) {
+      alert("sorry wrong patient id");
+    }
+    const instancePatient = await patient.at(patientAddress);
+    const checkDoctorId = await instancePatient.doctorApproval.call(
+      this.props.doctorId
+    );
+
+    if (checkDoctorId) {
+      this.setState({ doctorApproved: true });
+    } else {
+      alert("Sorry you are not allowed to view patient record");
+    }
+  };
+
   captureFile = event => {
     event.preventDefault();
     try {
@@ -238,7 +278,7 @@ class doctor extends Component {
 
   renderTabs() {
     const { Header, Row, HeaderCell, Body } = Table;
-
+    const { patientId } = this.state;
     const panes = [
       {
         menuItem: "Add File of Visit",
@@ -293,7 +333,28 @@ class doctor extends Component {
         menuItem: "View Patient Record",
         render: () => (
           <Tab.Pane attached={false}>
-            <h1>Patient Id</h1>
+            <h1>View Patient Record</h1>
+            <Form onSubmit={this.onSumbitPatientId}>
+              <Form.Group widths="equal">
+                <Form.Field>
+                  <label>Patient id</label>
+                  <Input
+                    value={this.state.patientId}
+                    onChange={this.onPatientId}
+                  />
+                </Form.Field>
+                <Button primary> View record </Button>
+              </Form.Group>
+            </Form>{" "}
+            <b>
+              {this.state.doctorApproved ? (
+                <Link route={`../doctor/patientRecord/${patientId}`}>
+                  <a>View Patient Record</a>
+                </Link>
+              ) : (
+                "Sorry you are not allowed"
+              )}
+            </b>
           </Tab.Pane>
         )
       }
@@ -302,18 +363,7 @@ class doctor extends Component {
   }
 
   render() {
-    if (this.props.doctorAddress === null) {
-      return (
-        <Layout>
-          <div style={{ color: "red" }}>
-            <h1>
-              You are not Registered as Doctor or you have selected wrong
-              account in metamask
-            </h1>
-          </div>
-        </Layout>
-      );
-    } else {
+    if (this.props.doctorAddress !== null) {
       return (
         <Layout>
           <div>
@@ -337,6 +387,17 @@ class doctor extends Component {
               <div> Account: {this.props.account}</div>
             </div>
             {this.renderTabs()}
+          </div>
+        </Layout>
+      );
+    } else {
+      return (
+        <Layout>
+          <div style={{ color: "red" }}>
+            <h1>
+              You are not Registered as Doctor or you have selected wrong
+              account in metamask
+            </h1>
           </div>
         </Layout>
       );

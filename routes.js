@@ -5,6 +5,8 @@ routes
   .add("/hospital/:address", "/hospital/hospitalDetails")
   .add("/patient/", "/patient/")
   .add("/patient/record/:hash", "/patient/record")
-  .add("/docotr", "/doctor");
+  .add("/doctor", "/doctor")
+  .add("/doctor/patientRecord/:patientId", "/doctor/patientRecord")
+  .add("/doctor/record/:hash", "/doctor/record");
 
 module.exports = routes;

@@ -89,6 +89,12 @@ class patient extends Component {
     doctorIdDis: ""
   };
 
+  checkApprovedDoctor = async () => {
+    const { patient } = this.props;
+    const doctorIdApproved = await patient.doctorIdArray.call();
+    this.setState({ doctorIdForApprove: doctorIdApproved.toNumber() });
+  };
+
   renderRow() {
     return this.props.appointmentListData.map((appointment, index) => {
       return (
@@ -175,6 +181,9 @@ class patient extends Component {
           from: this.props.account
         });
         alert(this.state.doctorId + "is Approved to view Your Record");
+        const doctorIdApproved = await patient.doctorIdArray.call();
+        this.setState({ doctorIdForApprove: doctorIdApproved.toNumber() });
+        console.log(this.state.doctorIdForApprove);
       } catch (error) {
         console.log("Error of try:", error);
         this.setState({ errorMessage: error.message });
@@ -201,6 +210,8 @@ class patient extends Component {
           gas: "100000"
         });
         alert(this.state.doctorIdDis + "is disApproved to view Your Record");
+        const doctorIdApproved = await patient.doctorIdArray.call();
+        this.setState({ doctorIdForApprove: doctorIdApproved.toNumber() });
       } catch (error) {
         console.log("Error of try:", error);
         this.setState({ errorMessageDis: error.message });
@@ -320,6 +331,14 @@ class patient extends Component {
                 </Grid.Column>
               </Grid.Row>
             </Grid>{" "}
+            <br />
+            <Button onClick={this.checkApprovedDoctor}>
+              {" "}
+              check approved doctor Number
+            </Button>
+            <p style={{ color: "red" }}>
+              Number of Doctor Approved: {this.state.doctorIdForApprove}
+            </p>
           </Tab.Pane>
         )
       }

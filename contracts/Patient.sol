@@ -1,14 +1,13 @@
 pragma solidity ^0.4.24;
-import "./Receptionist.sol";
 contract Patient{
 
-    ReceptionsitFactory factory;
     string public patientName;
     uint public patientId;
     string public gender;
     uint public age;
     address public manager;
     mapping(uint => bool) public doctorApproval;
+   uint  public doctorIdArray;
 
     struct Appointment{
         uint appointmentId;
@@ -20,8 +19,6 @@ contract Patient{
         bool completed;
     }
     uint[] public appointmentsList;
-
-
     mapping(uint=>Appointment) public appointments;
 
     constructor( uint _PatientId  , string _patientName, string _gender, uint _age , address _account){
@@ -32,17 +29,6 @@ contract Patient{
         patientId = _PatientId;
 
     }
-
-
-    function getManager() public view returns(address){
-        return (manager);
-    }
-
-
-      function getPatientName() public view returns( string){
-          return(patientName);
-      }
-
 
       function addAppointment(uint _AppointmentId, uint _PatientId , uint _DoctorId , string _Date , string _chiefComplaint) public{
           Appointment memory newAppointment = Appointment({
@@ -58,7 +44,6 @@ contract Patient{
           });
 
           appointments[_AppointmentId]=newAppointment;
-
           appointmentsList.push(_AppointmentId);
       }
 
@@ -71,7 +56,6 @@ contract Patient{
     function addPrescription(uint appointmentId , string prescription) public returns(uint){
             appointments[appointmentId].hash = prescription;
             appointments[appointmentId].completed = true;
-
     }
 
     function getAppointmentList() public view returns(uint){
@@ -81,13 +65,41 @@ contract Patient{
 
     function addDoctorApproval(uint doctorId) public{
             doctorApproval[doctorId] = true;
+            doctorIdArray++;
+
+            //doctorIdArray.push(doctorId);
         }
+
     function blockDoctor(uint doctorId) public{
         doctorApproval[doctorId] = false;
-    }
+        doctorIdArray--;
+        //removeByValue(doctorId);
+       }
 
-    function restricted(uint doctorId) public{
-        require(doctorApproval[doctorId]);
+    //for Array
 
-    }
+    // function getDoctorArray() returns (uint){
+    //   return doctorIdArray.length;
+    //   }
+    //
+    // function find(uint doctorId) returns(uint) {
+    //     uint i = 0;
+    //     while (doctorIdArray[i] != doctorId) {
+    //         i++;
+    //     }
+    //     return i;
+    // }
+    //
+    // function removeByValue(uint value) {
+    //     uint i = find(value);
+    //     removeByIndex(i);
+    // }
+    //
+    // function removeByIndex(uint i) {
+    //     while (i<doctorIdArray.length-1) {
+    //         doctorIdArray[i] = doctorIdArray[i+1];
+    //         i++;
+    //     }
+    //     doctorIdArray.length--;
+    // }
 }
