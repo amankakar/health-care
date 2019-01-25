@@ -1,7 +1,5 @@
 var ReceptionistFactory = artifacts.require("./ReceptionsitFactory.sol");
 var ReceptionsitContract = artifacts.require("./Receptionsit.sol");
-var PatientFactory = artifacts.require("./PatientFactory.sol");
-var PatientContract = artifacts.require("./Patient.sol");
 
 module.exports = async (deployer, accounts) => {
   await deployer.deploy(ReceptionistFactory).then(() => {

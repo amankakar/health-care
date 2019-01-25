@@ -136,7 +136,7 @@ class register extends Component {
 
             <Button loading={this.state.loading} primary>
               {" "}
-              Register Hospital{" "}
+              Register Admin/Receptionsit{" "}
             </Button>
           </Form>
         </div>

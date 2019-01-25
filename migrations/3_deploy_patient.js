@@ -1,4 +1,3 @@
-var PatientFactory = artifacts.require("PatientFactory");
 var PatientContract = artifacts.require("Patient");
 module.exports = async (deployer, accounts) => {
   await deployer.deploy(PatientFactory).then(() => {

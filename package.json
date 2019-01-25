@@ -7,13 +7,16 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "build": "next build",
+    "now-build": "next build",
+    "start": "NODE_ENV=production node server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bignumber.js": "^8.0.1",
+    "express": "^4.16.4",
     "ipfs-api": "^26.1.2",
     "mocha": "^5.2.0",
     "next": "^7.0.2",
@@ -30,6 +33,5 @@
     "semantic-ui-react": "^0.84.0",
     "truffle-contract": "^4.0.0-next.0",
     "web3": "^1.0.0-beta.35"
-  },
-  "devDependencies": {}
+  }
 }

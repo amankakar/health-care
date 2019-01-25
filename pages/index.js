@@ -112,7 +112,7 @@ class index extends Component {
               <Button
                 floated="right"
                 primary
-                content="Register New Hospital"
+                content="Register New Admin/Receptionist"
                 icon="add circle"
                 labelPosition="left"
               />
