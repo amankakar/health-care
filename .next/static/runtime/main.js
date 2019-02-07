@@ -6765,7 +6765,7 @@ function connect(options) {
             error.name = err.name;
             error.stack = err.stack;
             // __NEXT_DIST_DIR is provided by webpack
-            source_map_support_1.rewriteStacktrace(error, "/home/aman/Downloads/Video/health-care/.next");
+            source_map_support_1.rewriteStacktrace(error, "/home/aman41/health-care/.next");
             return error;
         }
     };
@@ -7541,7 +7541,7 @@ exports.default = (function (_a) {
                                 return [2 /*return*/, Promise.resolve()];
                             }
                             return [2 /*return*/, new Promise(function (resolve) {
-                                    ws = new WebSocket("ws://" + hostname + ":" + 43133);
+                                    ws = new WebSocket("ws://" + hostname + ":" + 35899);
                                     ws.onopen = function () { return resolve(); };
                                     ws.onclose = function () {
                                         setTimeout(function () { return __awaiter(_this, void 0, void 0, function () {
@@ -17253,7 +17253,7 @@ module.exports = {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /home/aman/Downloads/Video/health-care/node_modules/next/dist/client/next-dev */"./node_modules/next/dist/client/next-dev.js");
+module.exports = __webpack_require__(/*! /home/aman41/health-care/node_modules/next/dist/client/next-dev */"./node_modules/next/dist/client/next-dev.js");
 
 
 /***/ }),

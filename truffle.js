@@ -18,6 +18,13 @@ module.exports = {
       host: "localhost",
       port: 9545,
       network_id: "*" // Match any network id
+    },
+     localhost:{
+      host: "localhost",
+      port: 8545,
+      network_id : 1114,
+      from:"0x620f6ba38f5cc5d9e6fbabe3a56d9d994507d66f",
+    
     }
   }
   // See <http://truffleframework.com/docs/advanced/configuration>

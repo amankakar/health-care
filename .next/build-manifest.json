@@ -3,63 +3,63 @@
   "pages": {
     "/doctor": [
       "static/runtime/webpack-537dac27a855bf62cc9d.js",
-      "static/chunks/commons.edb2b30d951966bff205.js",
-      "static/runtime/main-30e0cfb57df5cf29f832.js"
+      "static/chunks/commons.5b171151f2046908cdaa.js",
+      "static/runtime/main-3de72536a667a3ae67e4.js"
     ],
     "/doctor/patientRecord": [
       "static/runtime/webpack-537dac27a855bf62cc9d.js",
-      "static/chunks/commons.edb2b30d951966bff205.js",
-      "static/runtime/main-30e0cfb57df5cf29f832.js"
+      "static/chunks/commons.5b171151f2046908cdaa.js",
+      "static/runtime/main-3de72536a667a3ae67e4.js"
     ],
     "/doctor/record": [
       "static/runtime/webpack-537dac27a855bf62cc9d.js",
-      "static/chunks/commons.edb2b30d951966bff205.js",
-      "static/runtime/main-30e0cfb57df5cf29f832.js"
+      "static/chunks/commons.5b171151f2046908cdaa.js",
+      "static/runtime/main-3de72536a667a3ae67e4.js"
     ],
     "/hospital/hospitalDetails": [
       "static/runtime/webpack-537dac27a855bf62cc9d.js",
-      "static/chunks/commons.edb2b30d951966bff205.js",
-      "static/runtime/main-30e0cfb57df5cf29f832.js"
+      "static/chunks/commons.5b171151f2046908cdaa.js",
+      "static/runtime/main-3de72536a667a3ae67e4.js"
     ],
     "/hospital/register": [
       "static/runtime/webpack-537dac27a855bf62cc9d.js",
-      "static/chunks/commons.edb2b30d951966bff205.js",
-      "static/runtime/main-30e0cfb57df5cf29f832.js"
+      "static/chunks/commons.5b171151f2046908cdaa.js",
+      "static/runtime/main-3de72536a667a3ae67e4.js"
     ],
     "/index": [
       "static/runtime/webpack-537dac27a855bf62cc9d.js",
-      "static/chunks/commons.edb2b30d951966bff205.js",
-      "static/runtime/main-30e0cfb57df5cf29f832.js"
+      "static/chunks/commons.5b171151f2046908cdaa.js",
+      "static/runtime/main-3de72536a667a3ae67e4.js"
     ],
     "/ipfs": [
       "static/runtime/webpack-537dac27a855bf62cc9d.js",
-      "static/chunks/commons.edb2b30d951966bff205.js",
-      "static/runtime/main-30e0cfb57df5cf29f832.js"
+      "static/chunks/commons.5b171151f2046908cdaa.js",
+      "static/runtime/main-3de72536a667a3ae67e4.js"
     ],
     "/patient": [
       "static/runtime/webpack-537dac27a855bf62cc9d.js",
-      "static/chunks/commons.edb2b30d951966bff205.js",
-      "static/runtime/main-30e0cfb57df5cf29f832.js"
+      "static/chunks/commons.5b171151f2046908cdaa.js",
+      "static/runtime/main-3de72536a667a3ae67e4.js"
     ],
     "/patient/record": [
       "static/runtime/webpack-537dac27a855bf62cc9d.js",
-      "static/chunks/commons.edb2b30d951966bff205.js",
-      "static/runtime/main-30e0cfb57df5cf29f832.js"
+      "static/chunks/commons.5b171151f2046908cdaa.js",
+      "static/runtime/main-3de72536a667a3ae67e4.js"
     ],
     "/_app": [
       "static/runtime/webpack-537dac27a855bf62cc9d.js",
-      "static/chunks/commons.edb2b30d951966bff205.js",
-      "static/runtime/main-30e0cfb57df5cf29f832.js"
+      "static/chunks/commons.5b171151f2046908cdaa.js",
+      "static/runtime/main-3de72536a667a3ae67e4.js"
     ],
     "/_error": [
       "static/runtime/webpack-537dac27a855bf62cc9d.js",
-      "static/chunks/commons.edb2b30d951966bff205.js",
-      "static/runtime/main-30e0cfb57df5cf29f832.js"
+      "static/chunks/commons.5b171151f2046908cdaa.js",
+      "static/runtime/main-3de72536a667a3ae67e4.js"
     ],
     "/": [
       "static/runtime/webpack-537dac27a855bf62cc9d.js",
-      "static/chunks/commons.edb2b30d951966bff205.js",
-      "static/runtime/main-30e0cfb57df5cf29f832.js"
+      "static/chunks/commons.5b171151f2046908cdaa.js",
+      "static/runtime/main-3de72536a667a3ae67e4.js"
     ]
   }
 }
